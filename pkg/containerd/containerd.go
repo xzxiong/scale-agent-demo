@@ -18,9 +18,16 @@ func InitClient(ctx context.Context, rootDir string) (err error) {
 	return err
 }
 
-// GetContainerClient returns a containerd container client.
+// NewContainerClient returns a containerd container client.
 // cc https://github.com/containerd/containerd?tab=readme-ov-file#namespaces
-func GetContainerClient(ctx context.Context, ns, id string) (containerd.Container, error) {
+func NewContainer(ctx context.Context, ns, id string) (containerd.Container, error) {
 	c, err := client.NewContainer(namespaces.WithNamespace(ctx, ns), id)
 	return c, err
+}
+
+// GetAllContainer returns all containers.
+// filters format cc github.com/containerd/containerd/pkg/filters:Parse
+// - example: matrixone.cloud/component=cn
+func GetAllContainer(ctx context.Context, filters ...string) ([]containerd.Container, error) {
+	return client.Containers(ctx, filters...)
 }
