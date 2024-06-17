@@ -4,7 +4,6 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -32,13 +31,7 @@ func Execute() {
 	if err != nil {
 		os.Exit(1)
 	}
-	if *version {
-		fmt.Printf("%s\n", version.GetInfoOneLine())
-		os.Exit(0)
-	}
 }
-
-var version *bool
 
 func init() {
 	// Here you will define your flags and configuration settings.
@@ -49,5 +42,5 @@ func init() {
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
-	version = rootCmd.Flags().BoolP("version", "v", false, "Show version info")
+	// showVersion = rootCmd.Flags().BoolP("version", "v", false, "Show version info")
 }
