@@ -1,4 +1,4 @@
-package containerd
+package container
 
 import (
 	"context"
@@ -11,10 +11,10 @@ import (
 
 var client *containerd.Client
 
-const defaultAddress = "/run/containerd/containerd.sock"
+const defaultContainerdAddress = "/run/containerd/containerd.sock"
 
 func InitClient(ctx context.Context, rootDir string) (err error) {
-	client, err = containerd.New(path.Join(rootDir, defaultAddress))
+	client, err = containerd.New(path.Join(rootDir, defaultContainerdAddress))
 	return err
 }
 
