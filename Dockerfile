@@ -31,6 +31,6 @@ ENV LC_ALL en_US.UTF-8
 WORKDIR /
 COPY --from=builder /workspace/bin/scale-agent .
 
-EXPOSE 8180
+EXPOSE 8080
 
 ENTRYPOINT ["/scale-agent"]

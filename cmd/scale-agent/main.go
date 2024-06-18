@@ -4,7 +4,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"time"
 
 	"github.com/xzxiong/scale-agent-demo/cmd"
 )
@@ -23,7 +22,7 @@ func main() {
 
 func handler(w http.ResponseWriter, r *http.Request) {
 	// 处理请求的逻辑
-	time.Sleep(5 * time.Second)
+	log.Printf("Received request: %s\n", r.Body)
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Hello, sidecar!"))
 }
