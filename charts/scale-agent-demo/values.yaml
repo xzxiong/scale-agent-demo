@@ -26,7 +26,7 @@ podLabels: []
 image:
   repository: docker.io/jacksonxie/repo
   pullPolicy: IfNotPresent
-  tag: scale-agent-demo-arm64-f7aac5d-240618
+  tag: scale-agent-demo-arm64-c0f853c-240619
 
 service:
   port: 8080
