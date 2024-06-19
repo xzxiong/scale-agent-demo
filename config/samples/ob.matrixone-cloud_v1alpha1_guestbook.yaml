@@ -1,0 +1,12 @@
+apiVersion: ob.matrixone-cloud.ob.matrixone.cn/v1alpha1
+kind: Guestbook
+metadata:
+  labels:
+    app.kubernetes.io/name: guestbook
+    app.kubernetes.io/instance: guestbook-sample
+    app.kubernetes.io/part-of: scale-agent-demo
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: scale-agent-demo
+  name: guestbook-sample
+spec:
+  # TODO(user): Add fields here
