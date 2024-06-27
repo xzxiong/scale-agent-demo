@@ -171,7 +171,7 @@ require (
 	k8s.io/kms v0.31.0-alpha.2 // indirect
 	k8s.io/kube-openapi v0.0.0-20240228011516-70dd3763d340 // indirect
 	k8s.io/kube-scheduler v0.0.0 // indirect
-	k8s.io/kubelet v0.31.0-alpha.2 // indirect
+	k8s.io/kubelet v0.30.2 // indirect
 	k8s.io/legacy-cloud-providers v0.30.2 // indirect
 	k8s.io/mount-utils v0.0.0 // indirect
 	k8s.io/utils v0.0.0-20240502163921-fe8a2dddb1d0 // indirect
@@ -184,7 +184,7 @@ require (
 )
 
 // warning
-replace k8s.io/kubelet v0.31.0-alpha.2 => k8s.io/kubelet v0.30.2
+//replace k8s.io/kubelet v0.31.0-alpha.2 => k8s.io/kubelet v0.30.2
 
 replace (
 	k8s.io/api v0.0.0 => k8s.io/api v0.30.2
@@ -201,4 +201,17 @@ replace (
 	k8s.io/kube-scheduler v0.0.0 => k8s.io/kube-scheduler v0.31.0-alpha.2
 	k8s.io/legacy-cloud-providers v0.0.0 => k8s.io/legacy-cloud-providers v0.30.2
 	k8s.io/mount-utils v0.0.0 => k8s.io/mount-utils v0.31.0-alpha.2
+)
+
+replace (
+	k8s.io/cli-runtime v0.0.0 => k8s.io/cli-runtime v0.31.0-alpha.2
+	k8s.io/cluster-bootstrap v0.0.0 => k8s.io/cluster-bootstrap v0.31.0-alpha.2
+	k8s.io/endpointslice v0.0.0 => k8s.io/endpointslice v0.31.0-alpha.2
+	k8s.io/kube-aggregator v0.0.0 => k8s.io/kube-aggregator v0.31.0-alpha.2
+	k8s.io/kube-controller-manager v0.0.0 => k8s.io/kube-controller-manager v0.31.0-alpha.2
+	k8s.io/kube-proxy v0.0.0 => k8s.io/kube-proxy v0.31.0-alpha.2
+	k8s.io/kubectl v0.0.0 => k8s.io/kubectl v0.31.0-alpha.2
+	k8s.io/metrics v0.0.0 => k8s.io/metrics v0.31.0-alpha.2
+	k8s.io/pod-security-admission v0.0.0 => k8s.io/pod-security-admission v0.31.0-alpha.2
+	k8s.io/sample-apiserver v0.0.0 => k8s.io/sample-apiserver v0.31.0-alpha.2
 )

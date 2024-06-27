@@ -1,9 +1,11 @@
 package kubelet
 
 import (
+	"fmt"
 	"os"
 
 	utilfeature "k8s.io/apiserver/pkg/util/feature"
+	klog "k8s.io/klog/v2"
 	"k8s.io/kubernetes/cmd/kubelet/app"
 	"k8s.io/kubernetes/cmd/kubelet/app/options"
 )
@@ -23,5 +25,9 @@ func init() {
 		KubeletConfiguration: *kubeletConfig,
 	}
 
-	kubeletDeps, err := app.UnsecuredDependencies(kubeletServer, utilfeature.DefaultFeatureGate)
+	//	kubeletDeps, err := app.UnsecuredDependencies(kubeletServer, utilfeature.DefaultFeatureGate)
+	_, err = app.UnsecuredDependencies(kubeletServer, utilfeature.DefaultFeatureGate)
+	if err != nil {
+		panic(fmt.Errorf("failed to construct kubelet dependencies: %w", err))
+	}
 }
