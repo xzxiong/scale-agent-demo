@@ -4,9 +4,9 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.14.0
-  name: guestbooks.ob.matrixone-cloud.ob.matrixone.cn
+  name: guestbooks.ob.matrixone-cloud
 spec:
-  group: ob.matrixone-cloud.ob.matrixone.cn
+  group: ob.matrixone-cloud
   names:
     kind: Guestbook
     listKind: GuestbookList

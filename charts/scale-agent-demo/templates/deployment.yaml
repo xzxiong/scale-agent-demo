@@ -5,6 +5,9 @@ metadata:
   labels:
     {{- include "scale-agent-demo.labels" . | nindent 4 }}
 spec:
+  selector:
+    matchLabels:
+      {{- include "scale-agent-demo.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -12,7 +15,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include ".Values.podLabels" . | nindent 8 }}
+        {{- include "scale-agent-demo.selectorLabels" . | nindent 8 }}
     spec:
       serviceAccountName: {{ include "scale-agent-demo.serviceAccountName" . }}
       containers:
@@ -29,34 +32,34 @@ spec:
           - mountPath: /rootfs
             name: rootfs
             readOnly: true
-          - mountPath: /var/run
-            name: var-run
-            readOnly: true
-          - mountPath: /sys
-            name: sys
-            readOnly: true
-          - mountPath: /var/lib/docker
-            name: docker
-            readOnly: true
-          - mountPath: /dev/disk
-            name: disk
-            readOnly: true
-        volumes:
-        - hostPath:
-            path: /
-          name: rootfs
-        - hostPath:
-            path: /var/run
-          name: var-run
-        - hostPath:
-            path: /sys
-          name: sys
-        - hostPath:
-            path: /var/lib/docker
-          name: docker
-        - hostPath:
-            path: /dev/disk
-          name: disk
+          #- mountPath: /var/run
+          #  name: var-run
+          #  readOnly: true
+          #- mountPath: /sys
+          #  name: sys
+          #  readOnly: true
+          #- mountPath: /var/lib/docker
+          #  name: docker
+          #  readOnly: true
+          #- mountPath: /dev/disk
+          #  name: disk
+          #  readOnly: true
+      volumes:
+      - hostPath:
+          path: /
+        name: rootfs
+      - hostPath:
+          path: /var/run
+        name: var-run
+      - hostPath:
+          path: /sys
+        name: sys
+      - hostPath:
+          path: /var/lib/docker
+        name: docker
+      - hostPath:
+          path: /dev/disk
+        name: disk
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

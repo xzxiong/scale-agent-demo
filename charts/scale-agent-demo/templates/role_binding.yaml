@@ -44,6 +44,20 @@ rules:
   - get
   - list
   - watch
+- apiGroups:
+  - ob.matrixone-cloud
+  resources:
+  - guestbooks
+  - guestbooks/finalizers
+  - guestbooks/status
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
 - nonResourceURLs:
   - /metrics
   - /metrics/cadvisor

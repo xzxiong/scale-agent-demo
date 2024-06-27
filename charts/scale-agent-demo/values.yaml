@@ -21,12 +21,10 @@ serviceAccount:
 
 podAnnotations: []
 
-podLabels: []
-
 image:
   repository: docker.io/jacksonxie/repo
   pullPolicy: IfNotPresent
-  tag: scale-agent-demo-arm64-c0f853c-240619
+  tag: scale-agent-demo
 
 service:
   port: 8080

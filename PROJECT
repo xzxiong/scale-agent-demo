@@ -2,14 +2,14 @@
 # This file is used to track the info used to scaffold your project
 # and allow the plugins properly work.
 # More info: https://book.kubebuilder.io/reference/project-config.html
-domain: ob.matrixone.cn
+domain: ob.matrixone-cloud
 layout:
 - go.kubebuilder.io/v4
 projectName: scale-agent-demo
 repo: github.com/xzxiong/scale-agent-demo
 resources:
-- domain: ob.matrixone.cn
-  group: ob.matrixone-cloud
+- domain: ob.matrixone-cloud
   kind: Guestbook
+  path: github.com/xzxiong/scale-agent-demo/api/v1alpha1
   version: v1alpha1
 version: "3"
