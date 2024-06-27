@@ -8,6 +8,8 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+
+	"github.com/xzxiong/scale-agent-demo/pkg/cmdline/kubelet"
 )
 
 // kubeletCmd represents the kubelet command
@@ -21,7 +23,7 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("kubelet called")
+		fmt.Printf("kubelet called mode: %s\n", kubelet.Mode)
 		if *kPid <= 0 {
 			fmt.Printf("[Error] invalid pid: %d", *kPid)
 			os.Exit(1)

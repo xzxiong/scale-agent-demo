@@ -30,3 +30,5 @@ func init() {
 	//}
 	fmt.Printf("kubeletServer: %s\n", kubeletServer)
 }
+
+const Mode = "kubelet"
