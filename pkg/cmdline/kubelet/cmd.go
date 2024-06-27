@@ -8,7 +8,7 @@ import (
 	"k8s.io/kubernetes/cmd/kubelet/app/options"
 )
 
-func init() {
+func buildKubeletDeps() {
 
 	kubeletFlags := options.NewKubeletFlags()
 	kubeletConfig, err := options.NewKubeletConfiguration()
