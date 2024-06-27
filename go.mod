@@ -92,12 +92,43 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	k8s.io/apiextensions-apiserver v0.30.2 // indirect
-	k8s.io/client-go v0.31.0-alpha.1 // indirect
-	k8s.io/component-base v0.31.0-alpha.1 // indirect
+	k8s.io/client-go v0.30.2 // indirect
+	k8s.io/component-base v0.30.2 // indirect
+	k8s.io/kubelet v0.30.2 // indirect
+	k8s.io/legacy-cloud-providers v0.30.2 // indirect
 	k8s.io/utils v0.0.0-20240502163921-fe8a2dddb1d0 // indirect
 	sigs.k8s.io/json v0.0.0-20221116044647-bc3834ca7abd // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.4.1 // indirect
 	sigs.k8s.io/yaml v1.4.0 // indirect
 	tags.cncf.io/container-device-interface v0.7.2 // indirect
 	tags.cncf.io/container-device-interface/specs-go v0.7.0 // indirect
+)
+
+//replace (
+//	k8s.io/client-go => ./staging/src/k8s.io/client-go
+//	k8s.io/cloud-provider => ./staging/src/k8s.io/cloud-provider
+//	k8s.io/cluster-bootstrap => ./staging/src/k8s.io/cluster-bootstrap
+//	k8s.io/code-generator => ./staging/src/k8s.io/code-generator
+//	k8s.io/component-base => ./staging/src/k8s.io/component-base
+//)
+
+replace (
+	k8s.io/api v0.0.0 => k8s.io/api v0.31.0-alpha.2
+	k8s.io/apimachinery v0.0.0 => k8s.io/apimachinery v0.31.0-alpha.2
+	k8s.io/apiserver v0.0.0 => k8s.io/apiserver v0.31.0-alpha.2
+	k8s.io/client-go v0.0.0 => k8s.io/client-go v0.31.0-alpha.2
+	k8s.io/cloud-provider v0.0.0 => k8s.io/cloud-provider v0.31.0-alpha.2
+	k8s.io/component-base v0.0.0 => k8s.io/component-base v0.31.0-alpha.2
+	k8s.io/component-helpers v0.0.0 => k8s.io/component-helpers v0.31.0-alpha.2
+	k8s.io/controller-manager v0.0.0 => k8s.io/controller-manager v0.31.0-alpha.2
+	k8s.io/csi-translation-lib v0.0.0 => k8s.io/csi-translation-lib v0.31.0-alpha.2
+	k8s.io/csi-translation-lib/plugins v0.0.0 => k8s.io/csi-translation-lib/plugins v0.31.0-alpha.2
+	k8s.io/dynamic-resource-allocation v0.0.0 => k8s.io/dynamic-resource-allocation v0.31.0-alpha.2
+	k8s.io/kube-scheduler v0.0.0 => k8s.io/kube-scheduler v0.31.0-alpha.2
+	k8s.io/legacy-cloud-providers v0.0.0 => k8s.io/legacy-cloud-providers v0.30.2
+	k8s.io/mount-utils v0.0.0 => k8s.io/mount-utils v0.31.0-alpha.2
+
+//k8s.io/legacy-cloud-providers/gce v0.0.0 => k8s.io/legacy-cloud-providers/gce v0.31.0-alpha.2
+//k8s.io/dynamic-resource-allocation/resourceclaim v0.0.0 => k8s.io/dynamic-resource-allocation/resourceclaim v0.31.0-alpha.2
+//k8s.io/dynamic-resource-allocation/structured/namedresources/cel v0.0.0 => k8s.io/dynamic-resource-allocation/structured/namedresources/cel v0.31.0-alpha.2
 )
