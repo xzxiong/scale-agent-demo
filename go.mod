@@ -4,14 +4,17 @@ go 1.22.0
 
 require (
 	github.com/containerd/containerd/v2 v2.0.0-rc.2
+	github.com/google/cadvisor v0.49.0
 	github.com/spf13/cobra v1.8.1
 	go.opentelemetry.io/otel/trace v1.26.0
+	k8s.io/api v0.31.0-alpha.2
 	k8s.io/apimachinery v0.31.0-alpha.2
 	k8s.io/apiserver v0.31.0-alpha.1
 	k8s.io/cri-api v0.31.0-alpha.1
 	k8s.io/cri-client v0.0.0
 	k8s.io/klog/v2 v2.120.1
 	k8s.io/kubernetes v1.31.0-alpha.1
+	k8s.io/utils v0.0.0-20230726121419-3b25d923346b
 	sigs.k8s.io/controller-runtime v0.18.4
 )
 
@@ -64,7 +67,6 @@ require (
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
-	github.com/google/cadvisor v0.49.0 // indirect
 	github.com/google/cel-go v0.20.1 // indirect
 	github.com/google/gnostic-models v0.6.8 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
@@ -149,7 +151,6 @@ require (
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	k8s.io/api v0.31.0-alpha.2 // indirect
 	k8s.io/apiextensions-apiserver v0.30.1 // indirect
 	k8s.io/client-go v0.31.0-alpha.2 // indirect
 	k8s.io/cloud-provider v0.30.0-rc.0 // indirect
@@ -163,7 +164,6 @@ require (
 	k8s.io/kube-scheduler v0.0.0 // indirect
 	k8s.io/kubelet v0.31.0-alpha.1 // indirect
 	k8s.io/mount-utils v0.0.0 // indirect
-	k8s.io/utils v0.0.0-20230726121419-3b25d923346b // indirect
 	sigs.k8s.io/apiserver-network-proxy/konnectivity-client v0.29.0 // indirect
 	sigs.k8s.io/json v0.0.0-20221116044647-bc3834ca7abd // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.4.1 // indirect
