@@ -29,6 +29,12 @@ ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
 WORKDIR /
+RUN if [ "$(go env GOHOSTOS)" == "linux" ]; then \
+    go install github.com/opencontainers/runc; \
+    if [ -e "$(go env GOPATH)/bin/runc" ]; then cp $(go env GOPATH)/bin/runc .; fi \
+fi
+
+WORKDIR /
 COPY --from=builder /workspace/bin/scale-agent .
 
 EXPOSE 8080
