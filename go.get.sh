@@ -26,3 +26,6 @@ go_get_update github.com/opencontainers/runc v1.1.7
 go_get_update k8s.io/kube-openapi v0.0.0-20230717233707-2695361300d9
 
 go_get k8s.io/kubernetes v1.28.4
+
+## for github.com/opencontainers/runc v1.1.7
+go_get github.com/cilium/ebpf v0.7.0

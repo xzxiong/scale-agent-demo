@@ -156,7 +156,7 @@ $(ENVTEST): $(LOCALBIN)
 
 .PHONY: clean
 clean:
-	@rm -rf bin/scale-agent
+	@rm -rf bin/scale-agent bin/controller-gen
 
 ###############################################################################
 # static-check
