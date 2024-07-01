@@ -28,6 +28,9 @@ spec:
               protocol: TCP
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          env:
+            - name: POD_NAMESPACE
+              value: {{ .Release.Namespace }}
           volumeMounts:
           - mountPath: /rootfs
             name: rootfs
