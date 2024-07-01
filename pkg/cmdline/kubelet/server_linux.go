@@ -103,7 +103,7 @@ func newCgroupManager(s *options.KubeletServer, kubeDeps *kubelet.Dependencies) 
 		NodeAllocatableConfig: cm.NodeAllocatableConfig{
 			KubeReservedCgroupName:   s.KubeReservedCgroup,
 			SystemReservedCgroupName: s.SystemReservedCgroup,
-			EnforceNodeAllocatable:   sets.Set[string](sets.NewString(s.EnforceNodeAllocatable...)),
+			EnforceNodeAllocatable:   sets.NewString(s.EnforceNodeAllocatable...),
 			KubeReserved:             kubeReserved,
 			SystemReserved:           systemReserved,
 			ReservedSystemCPUs:       reservedSystemCPUs,
@@ -239,7 +239,7 @@ func newContainerManager(s *options.KubeletServer, err error, kubeDeps *kubelet.
 			NodeAllocatableConfig: cm.NodeAllocatableConfig{
 				KubeReservedCgroupName:   s.KubeReservedCgroup,
 				SystemReservedCgroupName: s.SystemReservedCgroup,
-				EnforceNodeAllocatable:   sets.Set[string](sets.NewString(s.EnforceNodeAllocatable...)),
+				EnforceNodeAllocatable:   sets.NewString(s.EnforceNodeAllocatable...),
 				KubeReserved:             kubeReserved,
 				SystemReserved:           systemReserved,
 				ReservedSystemCPUs:       reservedSystemCPUs,

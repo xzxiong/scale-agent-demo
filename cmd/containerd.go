@@ -4,12 +4,9 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/spf13/cobra"
-
-	"github.com/xzxiong/scale-agent-demo/pkg/cmdline/containerd"
 )
 
 // containerdCmd represents the containerd command
@@ -23,11 +20,7 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("containerd called")
-		ctx := context.Background()
-		if *cList {
-			containerd.List(ctx)
-		}
+		fmt.Println("containerd called. [disabled]")
 	},
 }
 
