@@ -24,8 +24,10 @@ import (
 	"k8s.io/utils/cpuset"
 )
 
+var gCgroup cm.CgroupName
+
 // newCgroupManager returns a CgroupManager based on the passed options.
-func newCgroupManager(s *options.KubeletServer, kubeDeps *kubelet.Dependencies) (interface{}, error) {
+func newCgroupManager(s *options.KubeletServer, kubeDeps *kubelet.Dependencies) (cm.CgroupManager, error) {
 
 	if s.CgroupsPerQOS && s.CgroupRoot == "" {
 		klog.InfoS("--cgroups-per-qos enabled, but --cgroup-root was not specified.  defaulting to /")
@@ -156,6 +158,7 @@ func newCgroupManager(s *options.KubeletServer, kubeDeps *kubelet.Dependencies) 
 	return cgroupManager, nil
 }
 
+// copy from k8s.io/kubernetes/cmd/kubelet/app/server.go
 // copy from k8s.io/kubernetes/cmd/kubelet/app/server_linux.go
 // ========================================================
 
