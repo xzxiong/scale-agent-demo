@@ -29,6 +29,7 @@ rules:
   resources:
   - nodes
   - nodes/metrics
+  - namespaces
   - services
   - endpoints
   - pods

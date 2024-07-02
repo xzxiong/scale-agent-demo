@@ -34,7 +34,7 @@ spec:
           volumeMounts:
           - mountPath: /rootfs
             name: rootfs
-            readOnly: true
+            readOnly: false
           #- mountPath: /var/run
           #  name: var-run
           #  readOnly: true

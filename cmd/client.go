@@ -53,7 +53,7 @@ var clientPodCmd = &cobra.Command{
 		fmt.Printf("node: %s\n", node)
 		pods := client.ListPodsByNode(ctx, node)
 		for _, pod := range pods {
-			fmt.Printf("%10s %20s\n", pod.Namespace, pod.Name)
+			fmt.Printf("%18s %-20s\n", pod.Namespace, pod.Name)
 		}
 		fmt.Printf("cnt: %d\n", len(pods))
 		return

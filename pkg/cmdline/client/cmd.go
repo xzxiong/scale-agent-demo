@@ -12,15 +12,15 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
-const POD_NAMESPACE = "POD_NAMESPACE"
-const POD_NAME = "HOSTNAME"
+const PodNamespace = "POD_NAMESPACE"
+const PodName = "HOSTNAME"
 
 func GetNodeName(ctx context.Context) string {
 
 	clientset := GetK8sClient()
 
-	podName := os.Getenv(POD_NAME)
-	posNS := os.Getenv(POD_NAMESPACE)
+	podName := os.Getenv(PodName)
+	posNS := os.Getenv(PodNamespace)
 	fmt.Printf("pod name: %s, namespace: %s\n", podName, posNS)
 
 	// 获取当前 Pod 的信息
@@ -41,7 +41,7 @@ func ListPodsByNode(ctx context.Context, nodeName string) (res []*corev1.Pod) {
 	}
 
 	for _, ns := range nsList.Items {
-		fmt.Printf("list pod in ns %s\n", ns.Name)
+		fmt.Printf("list pod in namespace '%s'\n", ns.Name)
 		podList, err := clientset.CoreV1().Pods(ns.Name).List(ctx, metav1.ListOptions{})
 		if err != nil {
 			panic(err)
