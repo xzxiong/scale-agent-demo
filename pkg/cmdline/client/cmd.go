@@ -6,6 +6,7 @@ import (
 	"os"
 	"sync"
 
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -28,6 +29,32 @@ func GetNodeName(ctx context.Context) string {
 		panic(err.Error())
 	}
 	return pod.Spec.NodeName
+}
+
+func ListPodsByNode(ctx context.Context, nodeName string) (res []*corev1.Pod) {
+
+	clientset := GetK8sClient()
+	fmt.Printf("list namespsce\n")
+	nsList, err := clientset.CoreV1().Namespaces().List(ctx, metav1.ListOptions{})
+	if err != nil {
+		panic(err)
+	}
+
+	for _, ns := range nsList.Items {
+		fmt.Printf("list pod in ns %s\n", ns.Name)
+		podList, err := clientset.CoreV1().Pods(ns.Name).List(ctx, metav1.ListOptions{})
+		if err != nil {
+			panic(err)
+		}
+
+		for _, pod := range podList.Items {
+			if pod.Spec.NodeName == nodeName {
+				res = append(res, &pod)
+			}
+		}
+	}
+
+	return
 }
 
 var getClinetOnce sync.Once
