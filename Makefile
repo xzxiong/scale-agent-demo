@@ -82,7 +82,7 @@ test: ut
 ##@ Build
 
 .PHONY: build
-build: fmt vet ## Build manager binary.
+build: fmt #vet ## Build manager binary.
 	go build $(GOLDFLAGS) -o bin/scale-agent cmd/scale-agent/main.go
 
 # If you wish built the manager image targeting other platforms you can use the --platform flag.

@@ -2,6 +2,7 @@ package client
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"sync"
 
@@ -19,6 +20,7 @@ func GetNodeName(ctx context.Context) string {
 
 	podName := os.Getenv(POD_NAME)
 	posNS := os.Getenv(POD_NAMESPACE)
+	fmt.Printf("pod name: %s, namespace: %s\n", podName, posNS)
 
 	// 获取当前 Pod 的信息
 	pod, err := clientset.CoreV1().Pods(posNS).Get(ctx, podName, metav1.GetOptions{})
