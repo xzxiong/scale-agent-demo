@@ -8,6 +8,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	corev1 "k8s.io/api/core/v1"
 
 	"github.com/xzxiong/scale-agent-demo/pkg/cmdline/client"
 )
@@ -34,8 +35,19 @@ var clientNodeCmd = &cobra.Command{
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
-		node := client.GetNodeName(ctx)
-		fmt.Printf("node: %s\n", node)
+		nodeName := client.GetNodeName(ctx)
+		fmt.Printf("node: %s\n", nodeName)
+		// get access ip
+		node := client.GetNode(ctx, nodeName)
+		for _, addr := range node.Status.Addresses {
+			fmt.Printf("node host type: %s\n", addr.Type)
+			if addr.Address == string(corev1.NodeInternalIP) {
+				fmt.Printf("node host addr: %s [target]\n", addr.Address)
+			} else {
+				fmt.Printf("node host addr: %s [target]\n", addr.Address)
+			}
+		}
+
 		return
 	},
 }

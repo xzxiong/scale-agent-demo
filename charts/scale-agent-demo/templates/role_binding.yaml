@@ -62,5 +62,6 @@ rules:
 - nonResourceURLs:
   - /metrics
   - /metrics/cadvisor
+  - /configz
   verbs:
   - get

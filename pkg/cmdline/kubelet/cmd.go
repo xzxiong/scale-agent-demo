@@ -32,7 +32,7 @@ func buildContainerMgr() (*kubelet.Dependencies, error) {
 	// construct a KubeletServer from kubeletFlags and kubeletConfig
 	kubeletServer := &options.KubeletServer{
 		KubeletFlags:         *kubeletFlags,
-		KubeletConfiguration: *kubeletConfig,
+		KubeletConfiguration: *kubeletConfig, // This is the KEY config, MUST load from config.
 	}
 
 	kubeletDeps, err := app.UnsecuredDependencies(kubeletServer, utilfeature.DefaultFeatureGate)
