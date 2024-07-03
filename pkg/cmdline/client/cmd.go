@@ -60,7 +60,7 @@ func ListPodsByNode(ctx context.Context, nodeName string) (res []*corev1.Pod) {
 func GetNode(ctx context.Context, nodeName string) *corev1.Node {
 
 	clientset := GetK8sClient()
-	fmt.Printf("list namespsce\n")
+	fmt.Printf("Get node: %s\n", nodeName)
 	node, err := clientset.CoreV1().Nodes().Get(ctx, nodeName, metav1.GetOptions{})
 	if err != nil {
 		panic(err)

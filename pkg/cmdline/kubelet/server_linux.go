@@ -5,22 +5,29 @@ package kubelet
 
 import (
 	"fmt"
+	"io"
+	"path/filepath"
 	"strconv"
 
 	cadvisorapi "github.com/google/cadvisor/info/v1"
+	"github.com/spf13/pflag"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/apimachinery/pkg/util/sets"
 	utilfeature "k8s.io/apiserver/pkg/util/feature"
+	cliflag "k8s.io/component-base/cli/flag"
 	"k8s.io/klog/v2"
 	"k8s.io/kubernetes/cmd/kubelet/app/options"
 	"k8s.io/kubernetes/pkg/features"
 	"k8s.io/kubernetes/pkg/kubelet"
+	kubeletconfiginternal "k8s.io/kubernetes/pkg/kubelet/apis/config"
 	"k8s.io/kubernetes/pkg/kubelet/cm"
 	"k8s.io/kubernetes/pkg/kubelet/cm/cpumanager/topology"
 	"k8s.io/kubernetes/pkg/kubelet/eviction"
 	evictionapi "k8s.io/kubernetes/pkg/kubelet/eviction/api"
+	"k8s.io/kubernetes/pkg/kubelet/kubeletconfig/configfiles"
 	"k8s.io/kubernetes/pkg/kubelet/stats/pidlimit"
+	utilfs "k8s.io/kubernetes/pkg/util/filesystem"
 	"k8s.io/utils/cpuset"
 )
 
@@ -315,6 +322,82 @@ func getReservedCPUs(machineInfo *cadvisorapi.MachineInfo, cpus string) (cpuset.
 		return emptyCPUSet, fmt.Errorf("reserved-cpus: %s is not a subset of online-cpus: %s", cpus, allCPUSet.String())
 	}
 	return reservedCPUSet, nil
+}
+
+func loadConfigFile(name string) (*kubeletconfiginternal.KubeletConfiguration, error) {
+	const errFmt = "failed to load Kubelet config file %s, error %v"
+	// compute absolute path based on current working dir
+	kubeletConfigFile, err := filepath.Abs(name)
+	if err != nil {
+		return nil, fmt.Errorf(errFmt, name, err)
+	}
+	loader, err := configfiles.NewFsLoader(&utilfs.DefaultFs{}, kubeletConfigFile)
+	if err != nil {
+		return nil, fmt.Errorf(errFmt, name, err)
+	}
+	kc, err := loader.Load()
+	if err != nil {
+		return nil, fmt.Errorf(errFmt, name, err)
+	}
+
+	// EvictionHard may be nil if it was not set in kubelet's config file.
+	// EvictionHard can have OS-specific fields, which is why there's no default value for it.
+	// See: https://github.com/kubernetes/kubernetes/pull/110263
+	if kc.EvictionHard == nil {
+		kc.EvictionHard = eviction.DefaultEvictionHard
+	}
+	return kc, err
+}
+
+// newFlagSetWithGlobals constructs a new pflag.FlagSet with global flags registered
+// on it.
+func newFlagSetWithGlobals() *pflag.FlagSet {
+	fs := pflag.NewFlagSet("", pflag.ExitOnError)
+	// set the normalize func, similar to k8s.io/component-base/cli//flags.go:InitFlags
+	fs.SetNormalizeFunc(cliflag.WordSepNormalizeFunc)
+	// explicitly add flags from libs that register global flags
+	options.AddGlobalFlags(fs)
+	return fs
+}
+
+// newFakeFlagSet constructs a pflag.FlagSet with the same flags as fs, but where
+// all values have noop Set implementations
+func newFakeFlagSet(fs *pflag.FlagSet) *pflag.FlagSet {
+	ret := pflag.NewFlagSet("", pflag.ExitOnError)
+	ret.SetNormalizeFunc(fs.GetNormalizeFunc())
+	fs.VisitAll(func(f *pflag.Flag) {
+		ret.VarP(cliflag.NoOp{}, f.Name, f.Shorthand, f.Usage)
+	})
+	return ret
+}
+
+// kubeletConfigFlagPrecedence re-parses flags over the KubeletConfiguration object.
+// We must enforce flag precedence by re-parsing the command line into the new object.
+// This is necessary to preserve backwards-compatibility across binary upgrades.
+// See issue #56171 for more details.
+func kubeletConfigFlagPrecedence(kc *kubeletconfiginternal.KubeletConfiguration, args []string) error {
+	// We use a throwaway kubeletFlags and a fake global flagset to avoid double-parses,
+	// as some Set implementations accumulate values from multiple flag invocations.
+	fs := newFakeFlagSet(newFlagSetWithGlobals())
+	// register throwaway KubeletFlags
+	options.NewKubeletFlags().AddFlags(fs)
+	// register new KubeletConfiguration
+	options.AddKubeletConfigFlags(fs, kc)
+	// Remember original feature gates, so we can merge with flag gates later
+	original := kc.FeatureGates
+	// avoid duplicate printing the flag deprecation warnings during re-parsing
+	fs.SetOutput(io.Discard)
+	// re-parse flags
+	if err := fs.Parse(args); err != nil {
+		return err
+	}
+	// Add back feature gates that were set in the original kc, but not in flags
+	for k, v := range original {
+		if _, ok := kc.FeatureGates[k]; !ok {
+			kc.FeatureGates[k] = v
+		}
+	}
+	return nil
 }
 
 // copy from k8s.io/kubernetes/pkg/kubelet/cm/node_container_manager_linux.go

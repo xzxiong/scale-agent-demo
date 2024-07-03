@@ -11,28 +11,26 @@ import (
 	"strconv"
 
 	libcontainercgroups "github.com/opencontainers/runc/libcontainer/cgroups"
+	"github.com/spf13/pflag"
 	corev1 "k8s.io/api/core/v1"
 	utilfeature "k8s.io/apiserver/pkg/util/feature"
+	cliflag "k8s.io/component-base/cli/flag"
 	"k8s.io/klog/v2"
 	"k8s.io/kubernetes/cmd/kubelet/app"
 	"k8s.io/kubernetes/cmd/kubelet/app/options"
 	"k8s.io/kubernetes/pkg/kubelet"
 	"k8s.io/kubernetes/pkg/kubelet/cm"
+
+	"github.com/xzxiong/scale-agent-demo/pkg/util"
 )
 
 func buildContainerMgr() (*kubelet.Dependencies, error) {
 
-	kubeletFlags := options.NewKubeletFlags()
-	kubeletConfig, err := options.NewKubeletConfiguration()
+	// construct a KubeletServer from kubeletFlags and kubeletConfig
+	kubeletServer, err := getKubeletServer()
 	if err != nil {
 		klog.ErrorS(err, "Failed to create a new kubelet configuration")
 		os.Exit(1)
-	}
-
-	// construct a KubeletServer from kubeletFlags and kubeletConfig
-	kubeletServer := &options.KubeletServer{
-		KubeletFlags:         *kubeletFlags,
-		KubeletConfiguration: *kubeletConfig, // This is the KEY config, MUST load from config.
 	}
 
 	kubeletDeps, err := app.UnsecuredDependencies(kubeletServer, utilfeature.DefaultFeatureGate)
@@ -187,12 +185,83 @@ func setCgroupv2CpuConfig(cgroupPath string, resourceConfig *cm.ResourceConfig) 
 	return nil
 }
 
+const componentKubelet = "kubelet"
+
+// getKubeletServer
+// 1. chroot to rootfs
+// 2. get kubelet cmdline
+// 3. parse all cmdline args
+// 4. load kubeletConfig
+// 5. use cmdline args cover kubeletConfig's value
 func getKubeletServer() (*options.KubeletServer, error) {
+
+	// init
 	kubeletFlags := options.NewKubeletFlags()
 	kubeletConfig, err := options.NewKubeletConfiguration()
 	if err != nil {
 		klog.ErrorS(err, "Failed to create a new kubelet configuration")
 		os.Exit(1)
+	}
+
+	// Step 1.
+	err = util.Chroot(util.RootFS)
+	if err != nil {
+		panic(err)
+	}
+
+	// Step 2. find kubelet progress
+	var args []string
+	processes, err := util.GetProcessList()
+	if err != nil {
+		panic(err)
+	}
+	for _, process := range processes {
+		if process.Comm == componentKubelet {
+			args = process.Args
+			break
+		}
+	}
+	if len(args) == 0 {
+		panic(fmt.Errorf("kubelet cmdline args is empty"))
+	}
+
+	// Step 3. parse all cmdline args
+	cleanFlagSet := pflag.NewFlagSet(componentKubelet, pflag.ContinueOnError)
+	cleanFlagSet.SetNormalizeFunc(cliflag.WordSepNormalizeFunc)
+	kubeletFlags.AddFlags(cleanFlagSet)
+	options.AddKubeletConfigFlags(cleanFlagSet, kubeletConfig)
+	options.AddGlobalFlags(cleanFlagSet)
+	// initial flag parse, since we disable cobra's flag parsing
+	if err := cleanFlagSet.Parse(args); err != nil {
+		return nil, fmt.Errorf("failed to parse kubelet flag: %w", err)
+	}
+	// check if there are non-flag arguments in the command line
+	cmds := cleanFlagSet.Args()
+	if len(cmds) > 0 {
+		return nil, fmt.Errorf("unknown command %+s", cmds[0])
+	}
+
+	// Step 4.
+	// load kubelet config file, if provided
+	if len(kubeletFlags.KubeletConfigFile) > 0 {
+		kubeletConfig, err = loadConfigFile(kubeletFlags.KubeletConfigFile)
+		if err != nil {
+			return nil, fmt.Errorf("failed to load kubelet config file, path: %s, error: %w", kubeletFlags.KubeletConfigFile, err)
+		}
+	}
+
+	// Step 5.
+	if len(kubeletFlags.KubeletConfigFile) > 0 || len(kubeletFlags.KubeletDropinConfigDirectory) > 0 {
+		// We must enforce flag precedence by re-parsing the command line into the new object.
+		// This is necessary to preserve backwards-compatibility across binary upgrades.
+		// See issue #56171 for more details.
+		if err := kubeletConfigFlagPrecedence(kubeletConfig, args); err != nil {
+			return nil, fmt.Errorf("failed to precedence kubeletConfigFlag: %w", err)
+		}
+		// update feature gates based on new config
+		if err := utilfeature.DefaultMutableFeatureGate.SetFromMap(kubeletConfig.FeatureGates); err != nil {
+			return nil, fmt.Errorf("failed to set feature gates from initial flags-based config: %w", err)
+		}
 	}
 
 	// construct a KubeletServer from kubeletFlags and kubeletConfig
