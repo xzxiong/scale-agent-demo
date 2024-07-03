@@ -27,7 +27,7 @@ import (
 func buildContainerMgr() (*kubelet.Dependencies, error) {
 
 	// construct a KubeletServer from kubeletFlags and kubeletConfig
-	kubeletServer, err := getKubeletServer()
+	kubeletServer, err := GetKubeletServer()
 	if err != nil {
 		klog.ErrorS(err, "Failed to create a new kubelet configuration")
 		os.Exit(1)
@@ -66,7 +66,7 @@ func setCgroupCpu(pod *corev1.Pod) error {
 	// 	panic(err)
 	// }
 
-	kubeletServer, err := getKubeletServer()
+	kubeletServer, err := GetKubeletServer()
 	if err != nil {
 		panic(err)
 	}
@@ -126,7 +126,7 @@ func buildCgroupPaths(name cm.CgroupName, cgroupDriver string, subsystems *cm.Cg
 }
 
 func buildCgroupMgr() (cm.CgroupManager, error) {
-	kubeletServer, err := getKubeletServer()
+	kubeletServer, err := GetKubeletServer()
 	if err != nil {
 		panic(err)
 	}
@@ -187,13 +187,13 @@ func setCgroupv2CpuConfig(cgroupPath string, resourceConfig *cm.ResourceConfig) 
 
 const componentKubelet = "kubelet"
 
-// getKubeletServer
+// GetKubeletServer
 // 1. chroot to rootfs
 // 2. get kubelet cmdline
 // 3. parse all cmdline args
 // 4. load kubeletConfig
 // 5. use cmdline args cover kubeletConfig's value
-func getKubeletServer() (*options.KubeletServer, error) {
+func GetKubeletServer() (*options.KubeletServer, error) {
 
 	// init
 	kubeletFlags := options.NewKubeletFlags()

@@ -3,12 +3,18 @@
 
 package kubelet
 
-func buildContainerMgr() error {
-	return nil
-}
+import (
+	"fmt"
 
-func buildCgroupMgr() error {
-	return nil
+	"k8s.io/kubernetes/cmd/kubelet/app/options"
+)
+
+var NOTSupported = fmt.Errorf("NOT Supported")
+
+func buildContainerMgr() error { return NOTSupported }
+func buildCgroupMgr() error    { return NOTSupported }
+func GetKubeletServer() (*options.KubeletServer, error) {
+	return nil, NOTSupported
 }
 
 const Mode = "kubelet"

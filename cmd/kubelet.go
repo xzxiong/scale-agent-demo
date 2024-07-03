@@ -24,6 +24,16 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Printf("kubelet called mode: %s\n", kubelet.Mode)
+		if *kShow {
+			s, err := kubelet.GetKubeletServer()
+			if err != nil {
+				fmt.Printf("get kubelet server error: %s\n", err)
+				os.Exit(1)
+			}
+			fmt.Println("CgroupDriver: ", s.CgroupDriver)
+			fmt.Println("CgroupRoot:   ", s.CgroupRoot)
+			fmt.Println("QOSReserved:  ", s.QOSReserved)
+		}
 		if *kPid <= 0 {
 			fmt.Printf("[Error] invalid pid: %d", *kPid)
 			os.Exit(1)
@@ -37,6 +47,7 @@ to quickly create a Cobra application.`,
 
 var kPid *int
 var kCpu *bool
+var kShow *bool
 
 func init() {
 	rootCmd.AddCommand(kubeletCmd)
@@ -52,4 +63,5 @@ func init() {
 	// kubeletCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	kPid = kubeletCmd.Flags().IntP("pid", "p", 0, "process id")
 	kCpu = kubeletCmd.Flags().BoolP("cpu", "c", false, "Show cpu info")
+	kShow = kubeletCmd.Flags().BoolP("show", "s", false, "Show kubelet key config")
 }
