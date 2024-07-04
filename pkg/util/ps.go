@@ -11,10 +11,10 @@ type ProcessCmdLine struct {
 	Args []string
 }
 
-func GetProcessList() ([]ProcessCmdLine, error) {
+func GetProcessList(inHostNamespace bool) ([]ProcessCmdLine, error) {
 	//format := "user,pid,ppid,stime,pcpu,pmem,rss,vsz,stat,time,comm,psr,cgroup"
 	format := "comm,cmd"
-	out, err := getPsOutput(true, format)
+	out, err := getPsOutput(inHostNamespace, format)
 	if err != nil {
 		return nil, err
 	}
@@ -22,6 +22,10 @@ func GetProcessList() ([]ProcessCmdLine, error) {
 	lines := strings.Split(string(out), "\n")
 	ret := make([]ProcessCmdLine, 0, len(lines))
 	for _, line := range lines {
+		if len(line) == 0 { // It is the end-line, normally.
+			continue
+		}
+		fmt.Printf("line: %s\n", line)
 		fields := strings.Fields(line)
 		if len(fields) < 2 {
 			return nil, fmt.Errorf("invalid format: %s", line)

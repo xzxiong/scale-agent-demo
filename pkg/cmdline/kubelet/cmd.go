@@ -211,7 +211,7 @@ func GetKubeletServer() (*options.KubeletServer, error) {
 
 	// Step 2. find kubelet progress
 	var args []string
-	processes, err := util.GetProcessList()
+	processes, err := util.GetProcessList(true)
 	if err != nil {
 		panic(err)
 	}
