@@ -31,7 +31,7 @@ func GetProcessList(inHostNamespace bool) ([]ProcessCmdLine, error) {
 		if len(fields) < 2 {
 			return nil, fmt.Errorf("invalid format: %s", line)
 		}
-		ret = append(ret, ProcessCmdLine{Comm: fields[0], Args: fields[1:]})
+		ret = append(ret, ProcessCmdLine{Comm: fields[0], Args: fields[2:]})
 	}
 
 	return ret, nil

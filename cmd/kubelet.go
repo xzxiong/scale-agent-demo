@@ -33,6 +33,7 @@ to quickly create a Cobra application.`,
 			fmt.Println("CgroupDriver: ", s.CgroupDriver)
 			fmt.Println("CgroupRoot:   ", s.CgroupRoot)
 			fmt.Println("QOSReserved:  ", s.QOSReserved)
+			fmt.Println("Config:       ", s.KubeletConfigFile)
 		}
 		if *kPid <= 0 {
 			fmt.Printf("[Error] invalid pid: %d", *kPid)
