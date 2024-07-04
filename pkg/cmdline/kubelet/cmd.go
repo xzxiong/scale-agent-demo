@@ -287,7 +287,7 @@ var adaptConfig AdaptConfig
 func adaptKubelet_1_23_3_ConfigFlags(mainfs *pflag.FlagSet) {
 	fs := pflag.NewFlagSet("", pflag.ContinueOnError)
 	defer func() {
-		deprecated := "This parameter should be set in NEW Version."
+		deprecated := "This parameter should NOT be set in NEW Version."
 		notDeprecated := map[string]bool{
 			"notDeprecated-key": true,
 		}
