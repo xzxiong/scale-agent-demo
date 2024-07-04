@@ -19,6 +19,7 @@ import (
 	"k8s.io/kubernetes/cmd/kubelet/app"
 	"k8s.io/kubernetes/cmd/kubelet/app/options"
 	"k8s.io/kubernetes/pkg/kubelet"
+	"k8s.io/kubernetes/pkg/kubelet/cadvisor"
 	"k8s.io/kubernetes/pkg/kubelet/cm"
 
 	"github.com/xzxiong/scale-agent-demo/pkg/util"
@@ -44,14 +45,53 @@ func buildContainerMgr() (*kubelet.Dependencies, error) {
 	kubeDeps := kubeletDeps
 	s := kubeletServer
 
-	err2 := newContainerManager(s, err, kubeDeps)
-	if err2 != nil {
-		return nil, err2
+	err = initCadvisorInterface(s, kubeDeps)
+	if err != nil {
+		return nil, err
+	}
+
+	err = newContainerManager(s, err, kubeDeps)
+	if err != nil {
+		return nil, err
 	}
 	// err = containerManager.Start()
 	klog.Infof("NewContainerManager start: %v", kubeDeps.ContainerManager)
 
 	return kubeDeps, nil
+}
+
+// initCadvisorInterface for get machineInfo by calling kubeDeps.CAdvisorInterface.MachineInfo()
+// ref github.com/kubernetes/kubernetes/cmd/kubelet/app/server.go
+func initCadvisorInterface(s *options.KubeletServer, kubeDeps *kubelet.Dependencies) error {
+	var cgroupRoots []string
+	nodeAllocatableRoot := cm.NodeAllocatableRoot(s.CgroupRoot, s.CgroupsPerQOS, s.CgroupDriver)
+	cgroupRoots = append(cgroupRoots, nodeAllocatableRoot)
+	kubeletCgroup, err := cm.GetKubeletContainer(s.KubeletCgroups)
+	if err != nil {
+		klog.InfoS("Failed to get the kubelet's cgroup. Kubelet system container metrics may be missing.", "err", err)
+	} else if kubeletCgroup != "" {
+		cgroupRoots = append(cgroupRoots, kubeletCgroup)
+	}
+
+	if s.RuntimeCgroups != "" {
+		// RuntimeCgroups is optional, so ignore if it isn't specified
+		cgroupRoots = append(cgroupRoots, s.RuntimeCgroups)
+	}
+
+	if s.SystemCgroups != "" {
+		// SystemCgroups is optional, so ignore if it isn't specified
+		cgroupRoots = append(cgroupRoots, s.SystemCgroups)
+	}
+
+	if kubeDeps.CAdvisorInterface == nil {
+		imageFsInfoProvider := cadvisor.NewImageFsInfoProvider(s.ContainerRuntimeEndpoint)
+		kubeDeps.CAdvisorInterface, err = cadvisor.New(imageFsInfoProvider, s.RootDirectory, cgroupRoots, cadvisor.UsingLegacyCadvisorStats(s.ContainerRuntimeEndpoint), s.LocalStorageCapacityIsolation)
+		if err != nil {
+			panic(err)
+		}
+	}
+	// end init CAdvisorInterface
+	return nil
 }
 
 func GetCgroupCpu(pod *corev1.Pod) *cm.ResourceConfig {
@@ -185,6 +225,11 @@ func buildCgroupMgr() (cm.CgroupManager, error) {
 
 	kubeDeps := kubeletDeps
 	s := kubeletServer
+
+	err = initCadvisorInterface(s, kubeDeps)
+	if err != nil {
+		return nil, err
+	}
 
 	mgr, err := newCgroupManager(s, kubeDeps)
 	if err != nil {
