@@ -4,11 +4,13 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
 
+	"github.com/xzxiong/scale-agent-demo/pkg/cmdline/client"
 	"github.com/xzxiong/scale-agent-demo/pkg/cmdline/kubelet"
 )
 
@@ -35,23 +37,62 @@ to quickly create a Cobra application.`,
 			fmt.Println("QOSReserved:  ", s.QOSReserved)
 			fmt.Println("Config:       ", s.KubeletConfigFile)
 		}
-		if *kPid <= 0 {
-			fmt.Printf("[Error] invalid pid: %d", *kPid)
-			os.Exit(1)
+		if *kPid > 0 {
+			fmt.Printf("param pid: %d", *kPid)
 		}
 		if *kCpu {
 			fmt.Printf("kubelet cpu profiling for pid %d\n", *kPid)
 			fmt.Printf("(not support yet\n")
 		}
+		if kPod != "" {
+			fmt.Printf("kubelet cpu profiling for pid %d\n", *kPid)
+
+		}
 	},
 }
 
-var kPid *int
-var kCpu *bool
-var kShow *bool
+var kubeletCpuCmd = &cobra.Command{
+	Use:   "cpu",
+	Short: "A brief description of your command",
+	Long:  ``,
+	Run: func(cmd *cobra.Command, args []string) {
+		ctx := context.Background()
+		fmt.Println("kubelet cpu called")
+		if kNamespace == "" {
+			fmt.Printf("invalid param [namespace]: %s\n", kNamespace)
+			os.Exit(1)
+		}
+		if kPod == "" {
+			fmt.Printf("invalid param [pod]: %s\n", kPod)
+			os.Exit(1)
+		}
+
+		// get cpu max
+		pod := client.GetPod(ctx, kNamespace, kPod)
+		if pod == nil {
+			fmt.Printf("pod not found\n")
+			os.Exit(1)
+		}
+		cfg := kubelet.GetCgroupCpu(pod)
+		fmt.Printf(`CpuQuota: %d
+CpuPeriod: %d
+CpuShares: %d
+`, cfg.CPUQuota, cfg.CPUPeriod, cfg.CPUShares)
+	},
+}
+
+var (
+	kPid  *int
+	kCpu  *bool
+	kShow *bool
+
+	kNamespace string
+	kPod       string
+)
 
 func init() {
 	rootCmd.AddCommand(kubeletCmd)
+	kubeletCmd.AddCommand(kubeletCpuCmd)
 
 	// Here you will define your flags and configuration settings.
 
@@ -65,4 +106,7 @@ func init() {
 	kPid = kubeletCmd.Flags().IntP("pid", "p", 0, "process id")
 	kCpu = kubeletCmd.Flags().BoolP("cpu", "c", false, "Show cpu info")
 	kShow = kubeletCmd.Flags().BoolP("show", "s", false, "Show kubelet key config")
+
+	kubeletCpuCmd.Flags().StringVarP(&kNamespace, "namespace", "n", "default", "target pod's namespace")
+	kubeletCpuCmd.Flags().StringVarP(&kPod, "pod", "p", "", "target pod")
 }

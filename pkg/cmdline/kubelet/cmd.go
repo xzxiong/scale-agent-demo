@@ -54,6 +54,50 @@ func buildContainerMgr() (*kubelet.Dependencies, error) {
 	return kubeDeps, nil
 }
 
+func GetCgroupCpu(pod *corev1.Pod) *cm.ResourceConfig {
+
+	// ref k8s.io/kubernetes@v1.28.4/pkg/kubelet/cm/cgroup_manager_linux.go
+
+	// =======
+	// ref cgm.SetCgroupConfig
+	// =======
+	cgm, err := buildCgroupMgr()
+	if err != nil {
+		panic(err)
+	}
+
+	//kubeletServer, err := GetKubeletServer()
+	//if err != nil {
+	//	panic(err)
+	//}
+
+	kubeDeps, err := buildContainerMgr()
+	if err != nil {
+		panic(err)
+	}
+
+	// subSystems, err := cm.GetCgroupSubsystems()
+	// if err != nil {
+	// 	panic(err)
+	// }
+
+	cmgr := kubeDeps.ContainerManager
+	pcm := cmgr.NewPodContainerManager()
+	//resCfg, err := pcm.GetPodCgroupConfig(nil, corev1.ResourceStorage)
+	podCgroupName, _ := pcm.GetPodContainerName(pod)
+
+	// map: subsystem -> cgroup path
+	//cgroupPaths := buildCgroupPaths(podCgroupName, kubeletServer.CgroupDriver, subSystems)
+	//cpuCgroupPath := cgroupPaths[CgroupControllerCpu]
+
+	resourceConfig, err := cgm.GetCgroupConfig(podCgroupName, corev1.ResourceCPU)
+	if err != nil {
+		panic(err)
+	}
+
+	return resourceConfig
+}
+
 func setCgroupCpu(pod *corev1.Pod) error {
 
 	// ref k8s.io/kubernetes@v1.28.4/pkg/kubelet/cm/cgroup_manager_linux.go

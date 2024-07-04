@@ -69,6 +69,15 @@ func GetNode(ctx context.Context, nodeName string) *corev1.Node {
 	return node
 }
 
+func GetPod(ctx context.Context, ns, podName string) *corev1.Pod {
+	clientset := GetK8sClient()
+	pod, err := clientset.CoreV1().Pods(ns).Get(ctx, podName, metav1.GetOptions{})
+	if err != nil {
+		panic(err)
+	}
+	return pod
+}
+
 var getClinetOnce sync.Once
 var gClientset *kubernetes.Clientset
 
