@@ -9,6 +9,7 @@ import (
 	"path"
 	"path/filepath"
 	"strconv"
+	"sync"
 
 	libcontainercgroups "github.com/opencontainers/runc/libcontainer/cgroups"
 	"github.com/spf13/pflag"
@@ -276,6 +277,8 @@ func setCgroupv2CpuConfig(cgroupPath string, resourceConfig *cm.ResourceConfig) 
 
 const componentKubelet = "kubelet"
 
+var chrootOnce sync.Once
+
 // GetKubeletServer
 // 1. chroot to rootfs
 // 2. get kubelet cmdline
@@ -292,16 +295,31 @@ func GetKubeletServer() (*options.KubeletServer, error) {
 		os.Exit(1)
 	}
 
-	// Step 1.
-	rootfs := util.GetRootFS()
-	err = util.Chroot(rootfs)
+	filePaths, err := filepath.Glob("/*")
 	if err != nil {
 		panic(err)
 	}
+	foundRootFs := false
+	for _, filePath := range filePaths {
+		fmt.Println(filePath)
+		if filePath == util.DefaultRootfs {
+			foundRootFs = true
+		}
+	}
+	fmt.Printf("found rootfs(%s): %v\n", util.DefaultRootfs, foundRootFs)
+
+	// Step 1.
+	chrootOnce.Do(func() {
+		rootfs := util.GetRootFS()
+		err = util.Chroot(rootfs)
+		if err != nil {
+			panic(err)
+		}
+	})
 
 	// Step 2. find kubelet progress
 	var args []string
-	processes, err := util.GetProcessList(true)
+	processes, err := util.GetProcessList(true) // Step 1 already do the chroot
 	if err != nil {
 		panic(err)
 	}
