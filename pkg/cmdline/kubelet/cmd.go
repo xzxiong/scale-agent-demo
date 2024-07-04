@@ -232,6 +232,7 @@ func GetKubeletServer() (*options.KubeletServer, error) {
 	kubeletFlags.AddFlags(cleanFlagSet)
 	options.AddKubeletConfigFlags(cleanFlagSet, kubeletConfig)
 	options.AddGlobalFlags(cleanFlagSet)
+	adaptKubelet_1_23_3_ConfigFlags(cleanFlagSet)
 	// initial flag parse, since we disable cobra's flag parsing
 	if err := cleanFlagSet.Parse(args); err != nil {
 		return nil, fmt.Errorf("failed to parse kubelet flag: %w", err)
@@ -273,4 +274,33 @@ func GetKubeletServer() (*options.KubeletServer, error) {
 	return kubeletServer, err
 }
 
-const Mode = "kubelet"
+// ====================
+// adapt old version
+// ====================
+
+type AdaptConfig struct {
+	ContainerRuntime string // --container-runtime
+}
+
+var adaptConfig AdaptConfig
+
+func adaptKubelet_1_23_3_ConfigFlags(mainfs *pflag.FlagSet) {
+	fs := pflag.NewFlagSet("", pflag.ContinueOnError)
+	defer func() {
+		deprecated := "This parameter should be set in NEW Version."
+		notDeprecated := map[string]bool{
+			"notDeprecated-key": true,
+		}
+		fs.VisitAll(func(f *pflag.Flag) {
+			if notDeprecated[f.Name] {
+				return
+			}
+			f.Deprecated = deprecated
+		})
+		mainfs.AddFlagSet(fs)
+	}()
+
+	// --container-runtime string
+	// The container runtime to use. Possible value: 'remote'. (default "remote") (DEPRECATED: will be removed in 1.27 as the only valid value is 'remote')
+	fs.StringVar(&adaptConfig.ContainerRuntime, "container-runtime", adaptConfig.ContainerRuntime, "adapt 1.23.3 / 1.26 kubelet cmd-line")
+}
