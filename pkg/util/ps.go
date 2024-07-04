@@ -2,6 +2,7 @@ package util
 
 import (
 	"fmt"
+	"os"
 	"os/exec"
 	"strings"
 )
@@ -41,7 +42,8 @@ func getPsOutput(inHostNamespace bool, format string) ([]byte, error) {
 	command := "ps"
 	if !inHostNamespace {
 		command = "/usr/sbin/chroot"
-		args = append(args, "/rootfs", "ps")
+		rootfs := GetRootFS()
+		args = append(args, rootfs, "ps")
 	}
 	args = append(args, "-e", "-o", format)
 	out, err := exec.Command(command, args...).Output()
@@ -49,4 +51,16 @@ func getPsOutput(inHostNamespace bool, format string) ([]byte, error) {
 		return nil, fmt.Errorf("failed to execute %q command: %v", command, err)
 	}
 	return out, err
+}
+
+const EnvRootfs = "ROOTFS"
+const DefaultRootfs = "/rootfs"
+
+// GetRootFS get from evn EnvRootfs val first, if nil return DefaultRootfs
+func GetRootFS() string {
+	v := os.Getenv(EnvRootfs)
+	if len(v) == 0 {
+		return DefaultRootfs
+	}
+	return v
 }

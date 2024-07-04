@@ -204,7 +204,8 @@ func GetKubeletServer() (*options.KubeletServer, error) {
 	}
 
 	// Step 1.
-	err = util.Chroot(util.RootFS)
+	rootfs := util.GetRootFS()
+	err = util.Chroot(rootfs)
 	if err != nil {
 		panic(err)
 	}

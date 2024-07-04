@@ -11,7 +11,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-const RootFS = "/rootfs"
+const RootFS = DefaultRootfs
 
 func Chroot(rootfs string) error {
 	if err := syscall.Chroot(rootfs); err != nil {
