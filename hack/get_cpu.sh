@@ -3,7 +3,7 @@ self=`readlink -f $0`
 basedir=`dirname $self`
 bindir="$basedir/../bin"
 
-. $basedir/env.conf
+. $basedir/env.sh
 
 ns=$1
 pod=$2

@@ -3,7 +3,7 @@ self=`readlink -f $0`
 basedir=`dirname $self`
 bindir="$basedir/../bin"
 
-. $basedir/env.conf
+. $basedir/env.sh
 
 node=$1
 echo_proxy "list all pods in current node: '$node'"
