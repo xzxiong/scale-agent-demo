@@ -41,10 +41,10 @@ var clientNodeCmd = &cobra.Command{
 		node := client.GetNode(ctx, nodeName)
 		for _, addr := range node.Status.Addresses {
 			fmt.Printf("node host type: %s\n", addr.Type)
-			if addr.Address == string(corev1.NodeInternalIP) {
+			if addr.Type == corev1.NodeInternalIP {
 				fmt.Printf("node host addr: %s [target]\n", addr.Address)
 			} else {
-				fmt.Printf("node host addr: %s [target]\n", addr.Address)
+				fmt.Printf("node host addr: %s\n", addr.Address)
 			}
 		}
 
@@ -88,5 +88,10 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// kubeletCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	cNode = clientCmd.Flags().StringP("nodes", "n", "", "target node name")
+	//
+	// part clientCmd
+	//cNode = clientCmd.Flags().StringP("nodes", "n", "", "target node name")
+	//
+	// part clientPodCmd
+	cNode = clientPodCmd.Flags().StringP("nodes", "n", "", "target node name")
 }
