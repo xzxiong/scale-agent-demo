@@ -138,6 +138,8 @@ func GetCgroupCpu(pod *corev1.Pod) *cm.ResourceConfig {
 	//cgroupPaths := buildCgroupPaths(podCgroupName, kubeletServer.CgroupDriver, subSystems)
 	//cpuCgroupPath := cgroupPaths[CgroupControllerCpu]
 
+	fmt.Printf("cgroup path: %s\n", cgm.Name(podCgroupName))
+
 	resourceConfig, err := cgm.GetCgroupConfig(podCgroupName, corev1.ResourceCPU)
 	if err != nil {
 		panic(err)

@@ -75,10 +75,11 @@ var kubeletCpuCmd = &cobra.Command{
 			os.Exit(1)
 		}
 		cfg := kubelet.GetCgroupCpu(pod)
-		fmt.Printf(`CpuQuota: %d
+		fmt.Printf(`
+CpuQuota : %d
 CpuPeriod: %d
 CpuShares: %d
-`, cfg.CPUQuota, cfg.CPUPeriod, cfg.CPUShares)
+`, *cfg.CPUQuota, *cfg.CPUPeriod, *cfg.CPUShares)
 	},
 }
 

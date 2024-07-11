@@ -149,6 +149,11 @@ func newCgroupManager(s *options.KubeletServer, kubeDeps *kubelet.Dependencies) 
 		return nil, fmt.Errorf("failed to get mounted cgroup subsystems: %v", err)
 	}
 
+	fmt.Printf("subsystems\n")
+	for k, path := range subsystems.MountPoints {
+		fmt.Printf("system: %s -> %s\n", k, path)
+	}
+
 	// Turn CgroupRoot from a string (in cgroupfs path format) to internal CgroupName
 	cgroupRoot := cm.ParseCgroupfsToCgroupName(nodeConfig.CgroupRoot)
 	cgroupManager := cm.NewCgroupManager(subsystems, nodeConfig.CgroupDriver)
