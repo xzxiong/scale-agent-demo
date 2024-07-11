@@ -26,4 +26,5 @@ if [ -z "$HOSTNAME" ] ; then
     export POD_NAMESPACE="$ns"
     export HOSTNAME="$pod"
 fi
+export POD_NAME="$HOSTNAME"
 export ROOTFS="$rootfs"
