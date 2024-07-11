@@ -32,10 +32,11 @@ to quickly create a Cobra application.`,
 				fmt.Printf("get kubelet server error: %s\n", err)
 				os.Exit(1)
 			}
-			fmt.Println("CgroupDriver: ", s.CgroupDriver)
-			fmt.Println("CgroupRoot:   ", s.CgroupRoot)
-			fmt.Println("QOSReserved:  ", s.QOSReserved)
-			fmt.Println("Config:       ", s.KubeletConfigFile)
+			fmt.Println("CgroupDriver:  ", s.CgroupDriver)
+			fmt.Println("CgroupsPerQOS: ", s.CgroupsPerQOS)
+			fmt.Println("CgroupRoot:    ", s.CgroupRoot)
+			fmt.Println("QOSReserved:   ", s.QOSReserved)
+			fmt.Println("Config:        ", s.KubeletConfigFile)
 		}
 		if *kPid > 0 {
 			fmt.Printf("param pid: %d", *kPid)

@@ -18,6 +18,7 @@ import (
 	cliflag "k8s.io/component-base/cli/flag"
 	"k8s.io/klog/v2"
 	"k8s.io/kubernetes/cmd/kubelet/app/options"
+	v1qos "k8s.io/kubernetes/pkg/apis/core/v1/helper/qos"
 	"k8s.io/kubernetes/pkg/features"
 	"k8s.io/kubernetes/pkg/kubelet"
 	kubeletconfiginternal "k8s.io/kubernetes/pkg/kubelet/apis/config"
@@ -32,6 +33,16 @@ import (
 )
 
 var gCgroup cm.CgroupName
+
+var qosCM cm.QOSContainerManager
+
+var dummyResourceListGetter = func() v1.ResourceList {
+	return v1.ResourceList{}
+}
+
+var dummyActivePodsFunc cm.ActivePodsFunc = func() []*v1.Pod {
+	return nil
+}
 
 // newCgroupManager returns a CgroupManager based on the passed options.
 func newCgroupManager(s *options.KubeletServer, kubeDeps *kubelet.Dependencies) (cm.CgroupManager, error) {
@@ -161,6 +172,13 @@ func newCgroupManager(s *options.KubeletServer, kubeDeps *kubelet.Dependencies) 
 		cgroupRoot = cm.NewCgroupName(cgroupRoot, defaultNodeAllocatableCgroupName)
 	}
 	klog.InfoS("Creating Container Manager object based on Node Config", "nodeConfig", nodeConfig)
+
+	qosContainerManager, err := cm.NewQOSContainerManager(subsystems, cgroupRoot, nodeConfig, cgroupManager)
+	if err != nil {
+		return nil, err
+	}
+	qosContainerManager.Start(dummyResourceListGetter, dummyActivePodsFunc)
+	qosCM = qosContainerManager
 
 	return cgroupManager, nil
 }
@@ -398,6 +416,33 @@ func kubeletConfigFlagPrecedence(kc *kubeletconfiginternal.KubeletConfiguration,
 		}
 	}
 	return nil
+}
+
+// copy from k8s.io/kubernetes@v1.28.4/pkg/kubelet/cm/pod_container_manager_linux.go
+// ========================================================
+
+// GetPodContainerName returns the CgroupName identifier, and its literal cgroupfs form on the host.
+func GetPodContainerName(pod *v1.Pod, cgroupManager cm.CgroupManager) (cm.CgroupName, string) {
+	podQOS := v1qos.GetPodQOS(pod)
+	// Get the parent QOS container name
+	var parentContainer cm.CgroupName
+	qosContainersInfo := qosCM.GetQOSContainersInfo()
+	switch podQOS {
+	case v1.PodQOSGuaranteed:
+		parentContainer = qosContainersInfo.Guaranteed
+	case v1.PodQOSBurstable:
+		parentContainer = qosContainersInfo.Burstable
+	case v1.PodQOSBestEffort:
+		parentContainer = qosContainersInfo.BestEffort
+	}
+	podContainer := cm.GetPodCgroupNameSuffix(pod.UID)
+
+	// Get the absolute path of the cgroup
+	cgroupName := cm.NewCgroupName(parentContainer, podContainer)
+	// Get the literal cgroupfs name
+	cgroupfsName := cgroupManager.Name(cgroupName)
+
+	return cgroupName, cgroupfsName
 }
 
 // copy from k8s.io/kubernetes/pkg/kubelet/cm/node_container_manager_linux.go

@@ -112,20 +112,27 @@ func GetCgroupCpu(pod *corev1.Pod) *cm.ResourceConfig {
 	//	panic(err)
 	//}
 
-	kubeDeps, err := buildContainerMgr()
-	if err != nil {
-		panic(err)
-	}
+	// kubeDeps, err := buildContainerMgr()
+	// if err != nil {
+	// 	panic(err)
+	// }
 
 	// subSystems, err := cm.GetCgroupSubsystems()
 	// if err != nil {
 	// 	panic(err)
 	// }
 
-	cmgr := kubeDeps.ContainerManager
-	pcm := cmgr.NewPodContainerManager()
+	//cmgr := kubeDeps.ContainerManager
+	//pcm := cmgr.NewPodContainerManager()
 	//resCfg, err := pcm.GetPodCgroupConfig(nil, corev1.ResourceStorage)
-	podCgroupName, _ := pcm.GetPodContainerName(pod)
+	// TODO: pcm dependence on call qosContainersInfo, which is important to gen pod CgroupName
+	// qosContainersInfo generate by qosContainerManager, construct while calling qosContainerManager.Start
+	// pcm.Start called by cmgr.setupNode() <- cmgr.Start(....)
+	// qosContainerManager, err := cm.NewQOSContainerManager(subsystems, cgroupRoot, nodeConfig, cgroupManager)
+	//
+	// deprecated:
+	// podCgroupName, _ := pcm.GetPodContainerName(pod)
+	podCgroupName, _ := GetPodContainerName(pod, cgm)
 
 	// map: subsystem -> cgroup path
 	//cgroupPaths := buildCgroupPaths(podCgroupName, kubeletServer.CgroupDriver, subSystems)
