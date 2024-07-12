@@ -64,20 +64,28 @@ var clientPodCmd = &cobra.Command{
 		}
 		fmt.Printf("node: %s\n", node)
 		pods := client.ListPodsByNode(ctx, node)
-		nsLength := 10
-		for _, pod := range pods {
-			if l := len(pod.Namespace); l > nsLength {
-				nsLength = l
-			}
-		}
-		formatter := fmt.Sprintf("%%%ds %%s\n", nsLength)
-		fmt.Printf(formatter, "Namespace", "Pod")
-		for _, pod := range pods {
-			fmt.Printf(formatter, pod.Namespace, pod.Name)
-		}
-		fmt.Printf("cnt: %d\n", len(pods))
+		showAllPods(pods)
+
+		fmt.Printf(">> list (filter by node)")
+		pods = client.ListPodsByNodeName(ctx, node)
+		showAllPods(pods)
 		return
 	},
+}
+
+func showAllPods(pods []*corev1.Pod) {
+	nsLength := 10
+	for _, pod := range pods {
+		if l := len(pod.Namespace); l > nsLength {
+			nsLength = l
+		}
+	}
+	formatter := fmt.Sprintf("%%%ds %%s\n", nsLength)
+	fmt.Printf(formatter, "Namespace", "Pod")
+	for _, pod := range pods {
+		fmt.Printf(formatter, pod.Namespace, pod.Name)
+	}
+	fmt.Printf("cnt: %d\n", len(pods))
 }
 
 var cNode *string

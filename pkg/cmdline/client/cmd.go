@@ -8,8 +8,12 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/fields"
+	"k8s.io/apimachinery/pkg/runtime"
+	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/kubernetes"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 const PodNamespace = "POD_NAMESPACE"
@@ -52,6 +56,35 @@ func ListPodsByNode(ctx context.Context, nodeName string) (res []*corev1.Pod) {
 				res = append(res, &pod)
 			}
 		}
+	}
+
+	return
+}
+
+func ListPodsByNodeName(ctx context.Context, nodeName string) (res []*corev1.Pod) {
+
+	scheme := runtime.NewScheme()
+	utilruntime.Must(corev1.AddToScheme(scheme))
+
+	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
+		Scheme:                 scheme,
+		PprofBindAddress:       ":8183",
+		HealthProbeBindAddress: ":8182",
+		LeaderElection:         false,
+	})
+
+	if err != nil {
+		panic(err)
+	}
+
+	cli := mgr.GetClient()
+	podList := &corev1.PodList{}
+	cli.List(ctx, podList, client.MatchingFieldsSelector{
+		Selector: fields.OneTermEqualSelector("spec.nodeName", nodeName),
+	})
+
+	for _, pod := range podList.Items {
+		res = append(res, &pod)
 	}
 
 	return
