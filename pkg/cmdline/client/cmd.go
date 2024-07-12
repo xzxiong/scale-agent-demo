@@ -14,6 +14,10 @@ import (
 	"k8s.io/client-go/kubernetes"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/manager"
+	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
+
+	"github.com/xzxiong/scale-agent-demo/pkg/util"
 )
 
 const PodNamespace = "POD_NAMESPACE"
@@ -62,31 +66,19 @@ func ListPodsByNode(ctx context.Context, nodeName string) (res []*corev1.Pod) {
 }
 
 func ListPodsByNodeName(ctx context.Context, nodeName string) (res []*corev1.Pod) {
+	var err error
 
-	scheme := runtime.NewScheme()
-	utilruntime.Must(corev1.AddToScheme(scheme))
-
-	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
-		Scheme:                 scheme,
-		PprofBindAddress:       ":8183",
-		HealthProbeBindAddress: ":8182",
-		LeaderElection:         false,
-	})
-
-	if err != nil {
-		panic(err)
-	}
-
-	cli := mgr.GetClient()
+	cli := GetK8sManagerClient(ctx)
 	podList := &corev1.PodList{}
-	cli.List(ctx, podList, client.MatchingFieldsSelector{
+	err = cli.List(ctx, podList, client.MatchingFieldsSelector{
+		//Selector: fields.ParseSelectorOrDie(fmt.Sprintf("spec.nodeName=%s", nodeName)),
 		Selector: fields.OneTermEqualSelector("spec.nodeName", nodeName),
 	})
+	util.NoErrOrDie(err)
 
 	for _, pod := range podList.Items {
 		res = append(res, &pod)
 	}
-
 	return
 }
 
@@ -124,4 +116,34 @@ func GetK8sClient() *kubernetes.Clientset {
 		gClientset = clientset
 	})
 	return gClientset
+}
+
+var getMgrOnce sync.Once
+var mgr manager.Manager
+
+func GetK8sManagerClient(ctx context.Context) client.Client {
+	var err error
+
+	getMgrOnce.Do(func() {
+		scheme := runtime.NewScheme()
+		utilruntime.Must(corev1.AddToScheme(scheme))
+
+		mgr, err = ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
+			Scheme: scheme,
+			Metrics: metricsserver.Options{
+				BindAddress: "0", // close
+			},
+			PprofBindAddress:       ":8183",
+			HealthProbeBindAddress: ":8182",
+			LeaderElection:         false,
+		})
+		util.NoErrOrDie(err)
+
+		go func() {
+			err = mgr.Start(ctx)
+			util.NoErrOrDie(err)
+		}()
+	})
+
+	return mgr.GetClient()
 }
