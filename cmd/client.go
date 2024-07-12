@@ -66,7 +66,7 @@ var clientPodCmd = &cobra.Command{
 		//pods := client.ListPodsByNode(ctx, node)
 		//showAllPods(pods)
 
-		fmt.Printf(">> list (filter by node)")
+		fmt.Printf(">> list (filter by node)\n")
 		pods := client.ListPodsByNodeName(ctx, node)
 		showAllPods(pods)
 		return

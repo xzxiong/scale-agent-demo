@@ -8,7 +8,6 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/kubernetes"
@@ -70,10 +69,16 @@ func ListPodsByNodeName(ctx context.Context, nodeName string) (res []*corev1.Pod
 
 	cli := GetK8sManagerClient(ctx)
 	podList := &corev1.PodList{}
-	err = cli.List(ctx, podList, client.MatchingFieldsSelector{
-		//Selector: fields.ParseSelectorOrDie(fmt.Sprintf("spec.nodeName=%s", nodeName)),
-		Selector: fields.OneTermEqualSelector("spec.nodeName", nodeName),
-	})
+	err = cli.List(ctx, podList, &client.ListOptions{
+		Raw: &metav1.ListOptions{
+			FieldSelector: fmt.Sprintf("spec.nodeName=%s", nodeName),
+		},
+	},
+	)
+	// 看起来只支持 namespace
+	//client.MatchingFieldsSelector{
+	//	Selector: fields.OneTermEqualSelector("spec.nodeName", nodeName),
+	//},
 	util.NoErrOrDie(err)
 
 	for _, pod := range podList.Items {
@@ -143,6 +148,10 @@ func GetK8sManagerClient(ctx context.Context) client.Client {
 			err = mgr.Start(ctx)
 			util.NoErrOrDie(err)
 		}()
+
+		fmt.Println("wait ctlMgr.Elected")
+		<-mgr.Elected()
+		fmt.Println("wait ctlMgr.Elected: done")
 	})
 
 	return mgr.GetClient()
