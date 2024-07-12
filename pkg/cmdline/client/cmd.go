@@ -69,16 +69,20 @@ func ListPodsByNodeName(ctx context.Context, nodeName string) (res []*corev1.Pod
 
 	cli := GetK8sManagerClient(ctx)
 	podList := &corev1.PodList{}
-	err = cli.List(ctx, podList, &client.ListOptions{
-		Raw: &metav1.ListOptions{
-			FieldSelector: fmt.Sprintf("spec.nodeName=%s", nodeName),
+	err = cli.List(ctx, podList,
+		client.MatchingFields{
+			fieldNodeName: nodeName,
 		},
-	},
+		//	&client.ListOptions{
+		//		Raw: &metav1.ListOptions{
+		//			FieldSelector: fmt.Sprintf("spec.nodeName=%s", nodeName),
+		//		},
+		//	},
+		//	// 看起来只支持 namespace
+		//client.MatchingFieldsSelector{
+		//	Selector: fields.OneTermEqualSelector(fieldNodeName, nodeName),
+		//},
 	)
-	// 看起来只支持 namespace
-	//client.MatchingFieldsSelector{
-	//	Selector: fields.OneTermEqualSelector("spec.nodeName", nodeName),
-	//},
 	util.NoErrOrDie(err)
 
 	for _, pod := range podList.Items {
@@ -126,6 +130,8 @@ func GetK8sClient() *kubernetes.Clientset {
 var getMgrOnce sync.Once
 var mgr manager.Manager
 
+const fieldNodeName = "spec.nodeName"
+
 func GetK8sManagerClient(ctx context.Context) client.Client {
 	var err error
 
@@ -148,6 +154,16 @@ func GetK8sManagerClient(ctx context.Context) client.Client {
 			err = mgr.Start(ctx)
 			util.NoErrOrDie(err)
 		}()
+
+		// init self-defined. indexer
+		indexer := mgr.GetFieldIndexer()
+		indexer.IndexField(ctx, &corev1.Pod{}, fieldNodeName, func(o client.Object) []string {
+			nodeName := o.(*corev1.Pod).Spec.NodeName
+			if nodeName != "" {
+				return []string{nodeName}
+			}
+			return nil
+		})
 
 		fmt.Println("wait ctlMgr.Elected")
 		<-mgr.Elected()
