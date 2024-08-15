@@ -110,7 +110,7 @@ var clientEnvCmd = &cobra.Command{
 				keyLen = len(k)
 			}
 		}
-		formatter := fmt.Sprintf("%%%ds: %%s", keyLen)
+		formatter := fmt.Sprintf("%%%ds: %%s\n", keyLen)
 		for key, cmd := range cmds {
 			fmt.Printf(formatter, key, cmd())
 		}
