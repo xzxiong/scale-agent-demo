@@ -6,6 +6,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"runtime"
 
 	"github.com/spf13/cobra"
 	corev1 "k8s.io/api/core/v1"
@@ -88,12 +89,43 @@ func showAllPods(pods []*corev1.Pod) {
 	fmt.Printf("cnt: %d\n", len(pods))
 }
 
+var clientEnvCmd = &cobra.Command{
+	Use:   "env",
+	Short: "show all environment variables",
+	Long:  ``,
+	Run: func(cmd *cobra.Command, args []string) {
+		// ctx := context.Background()
+		cmds := map[string]func() string{
+			"GOMAXPROCS": func() string {
+				return fmt.Sprintf("%d", runtime.GOMAXPROCS(0))
+			},
+			"cpu": func() string {
+				return fmt.Sprintf("%d", runtime.NumCPU())
+			},
+		}
+
+		keyLen := 1
+		for k := range cmds {
+			if len(k) > keyLen {
+				keyLen = len(k)
+			}
+		}
+		formatter := fmt.Sprintf("%%%ds: %%s", keyLen)
+		for key, cmd := range cmds {
+			fmt.Printf(formatter, key, cmd())
+		}
+
+		return
+	},
+}
+
 var cNode *string
 
 func init() {
 	rootCmd.AddCommand(clientCmd)
 	clientCmd.AddCommand(clientNodeCmd)
 	clientCmd.AddCommand(clientPodCmd)
+	clientCmd.AddCommand(clientEnvCmd)
 
 	// Here you will define your flags and configuration settings.
 
